@@ -1,10 +1,21 @@
+import time
 from flask import request
 from app.models.user_model import User
 from app.models.category_model import Category
 from app.models.absen_model import Absen
 from app.models.company_model import Company
+from app.models.history_model import History
 from app.controllers.face_recognition import *
 from app.utils import *
+
+# tambahan untuk base64
+import requests
+import base64
+import pandas as pd
+
+# MQTT
+import paho.mqtt.client as mqtt
+
 
 def absen_check(user_id):
   user = User.get_by_id(user_id)
@@ -263,3 +274,141 @@ def get_absen_by_date_n_company(company_id, date):
       absens[i]['idCompany'] = company
   
   return success_response(absens)
+
+def test_deepface():
+  image1 = request.json['image']
+
+  user = User.get_all()
+  if not user:
+    return error_response("user tidak ada")
+  
+  # Konfigurasi broker MQTT
+  broker_address = "test.mosquitto.org"  # Masukkan alamat broker MQTT Anda di sini
+  port = 1883  # Port default untuk MQTT
+  topic = "inTopic"  # Topik yang akan digunakan untuk mengirim data ke ESP32-CAM
+
+  # Inisialisasi client MQTT
+  client = mqtt.Client("PythonClient")  # Beri nama unik untuk klien Anda
+
+  def on_connect(client, userdata, flags, rc):
+      if rc == 0:
+          print("Terhubung ke broker MQTT")
+      else:
+          print("Gagal terhubung dengan kode error: " + str(rc))
+
+  def on_publish(client, userdata, mid):
+      print("Pesan terpublikasi")
+
+  # Mengatur callback
+  client.on_connect = on_connect
+  client.on_publish = on_publish
+
+  # Menghubungkan ke broker
+  client.connect(broker_address, port)
+
+  # Menunggu koneksi terhubung
+  client.loop_start()
+  time.sleep(2)
+  
+  data = []
+  for i in range(len(user)):
+    result = face_recog_deepface(image1=user[i]['image'], image2=image1, model="ArcFace", detector="mtcnn")
+    obj = {
+      "verified": result['verified'],
+      "distance": result['distance'],
+      "threshold": result['threshold'],
+      "model": result['model'],
+      "detector": result['detector_backend'],
+      "similarity_metric": result['similarity_metric'],
+      "time": result['time']
+    }
+
+    data.append(obj)
+
+
+    try:
+        if result['verified']:
+        # if result['verified'] and result['distance'] <= 0.4:
+            dt = datetime.datetime.now()
+            dateNow = dt.strftime('%Y-%m-%d')
+            timeNow = dt.strftime('%H%M')
+
+            # Ambil dua digit pertama sebagai jam
+            jam = timeNow[:2]
+            
+            # Ambil dua digit terakhir sebagai menit
+            menit = timeNow[2:]
+            
+            # Gabungkan kembali dengan format waktu yang sesuai
+            waktu_format = f"{jam}:{menit}"
+
+            history = History.create(idUser=user[i]['id'], name=user[i]['name'], date=dateNow, status="Masuk", image=image1, time=waktu_format)
+            if not history:
+              error_response("gagal absen")
+
+            # Kirim pesan ke ESP32-CAM
+            pesan = "1"  # Ganti pesan sesuai kebutuhan Anda
+            client.publish(topic, pesan)
+            print("Pesan terkirim: " + pesan)
+            break
+            # time.sleep(2)  # Tunda pengiriman pesan selama 5 detik
+        else:
+            dt = datetime.datetime.now()
+            dateNow = dt.strftime('%Y-%m-%d')
+            timeNow = dt.strftime('%H%M')
+
+            # Ambil dua digit pertama sebagai jam
+            jam = timeNow[:2]
+            
+            # Ambil dua digit terakhir sebagai menit
+            menit = timeNow[2:]
+              
+            # Gabungkan kembali dengan format waktu yang sesuai
+            waktu_format = f"{jam}:{menit}"
+
+            history = History.create(idUser=user[i]['id'], name=user[i]['name'], date=dateNow, status="Gagal", image=image1, time=waktu_format)
+            # Kirim pesan ke ESP32-CAM
+            pesan = "0"  # Ganti pesan sesuai kebutuhan Anda
+            client.publish(topic, pesan)
+            print("Pesan terkirim: " + pesan)
+            # time.sleep(2)  # Tunda pengiriman pesan selama 5 detik
+    except KeyboardInterrupt:
+        pass
+
+  
+  # Berhenti dari loop dan putus koneksi
+  client.loop_stop()
+  client.disconnect()
+    
+  df = pd.DataFrame(data)
+  namaExcel = "hasil_test.xlsx"
+  sheetName = 'DataSheet'
+
+  df.to_excel(namaExcel, sheet_name=sheetName, index=False)
+
+  return success_response(data)
+
+def upload_image_to_uploadcare(base64image):
+    # Membaca base64image dan mengubahnya menjadi byte object
+    image_data = base64.b64decode(base64image)
+    
+    pub_key = '448aa6eb11abd3614ce5'
+
+    payload = {
+        'UPLOADCARE_PUB_KEY': pub_key,
+    }
+
+    # Meng-upload image ke uploadcare.com
+    upload_url = 'https://upload.uploadcare.com/base/'
+    response = requests.post(upload_url, files={'uploaded_file': image_data}, data=payload)
+
+    # Memeriksa apakah pengunggahan berhasil
+    if response.status_code == 200:
+        # Mendapatkan URL dari response JSON
+        uploaded_url = response.json()['file']
+        return uploaded_url
+    else:
+        # Jika terjadi kesalahan, tampilkan pesan error
+        print(f"Upload gagal dengan kode status: {response.status_code}")
+        return None
+

@@ -84,12 +84,13 @@ class User(db.Document):
         return user.to_dict()
 
     @staticmethod
-    def delete(user_id):
-        user = User.get_by_id(user_id)
-        if not user:
+    def delete_by_id(id):
+        try:
+            user = User.objects.get(id=id)
+            user.delete()
+            return user.to_dict()
+        except User.DoesNotExist:
             return None
-        user.delete()
-        return user.to_dict()
     
     @staticmethod
     def get_by_id(user_id):

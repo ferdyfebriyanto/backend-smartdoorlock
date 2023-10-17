@@ -6,6 +6,7 @@ from app.views.setting_view import setting_bp
 from app.views.config_view import config_bp
 from app.views.category_view import category_bp
 from app.views.absen_view import absen_bp
+from app.views.history_view import history_bp
 from app.views.unregister_face_view import unregister_bp
 from config import Config
 from app.database import initialize_db
@@ -26,6 +27,7 @@ def create_app():
     app.register_blueprint(category_bp)
     app.register_blueprint(absen_bp)
     app.register_blueprint(unregister_bp)
+    app.register_blueprint(history_bp)
     
     @app.errorhandler(Exception)
     def handle_error(e):

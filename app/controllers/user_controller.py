@@ -46,6 +46,7 @@ def get_user(user_id):
         return error_response("User tidak ada")
 
 def update_user(user_id):
+    print(request.json)
     name = request.json['name']
     email = request.json['email']
     password = request.json['password']
@@ -65,7 +66,7 @@ def update_user(user_id):
         return error_response("User not found")
 
 def delete_user(user_id):
-    user = User.delete(user_id)
+    user = User.delete_by_id(user_id)
     if user:
         return success_response(user)
     else:

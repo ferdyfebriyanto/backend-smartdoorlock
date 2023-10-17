@@ -8,7 +8,7 @@ def download_image_from_url(url, save_path):
     with open(save_path, 'wb') as f:
         f.write(response.content)
         
-def face_recog_deepface(image1, image2, model):
+def face_recog_deepface(image1, image2, model, detector):
   # Menentukan path tempat penyimpanan sementara
   image_temp_dir = "image_temp"
   os.makedirs(image_temp_dir, exist_ok=True)
@@ -19,7 +19,7 @@ def face_recog_deepface(image1, image2, model):
   download_image_from_url(image1, image1_path)
   download_image_from_url(image2, image2_path)
     
-  recog = DeepFace.verify(img1_path=image1_path, img2_path=image2_path, model_name=model)
+  recog = DeepFace.verify(img1_path=image1_path, img2_path=image2_path, model_name=model, enforce_detection=False, detector_backend=detector)
   
   print(recog)
   
@@ -28,4 +28,4 @@ def face_recog_deepface(image1, image2, model):
   os.remove(image2_path)
   os.rmdir(image_temp_dir)
   
-  return recog['verified']
+  return recog
