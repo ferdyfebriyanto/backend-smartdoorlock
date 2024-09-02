@@ -7,6 +7,8 @@ from app.models.company_model import Company
 from app.models.history_model import History
 from app.controllers.face_recognition import *
 from app.utils import *
+import asyncio
+from websockets.asyncio.client import connect
 
 # tambahan untuk base64
 import requests

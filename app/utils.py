@@ -3,6 +3,7 @@
 import datetime
 from flask import jsonify
 
+
 def success_response(data):
     response = {
         "status": True,
@@ -11,6 +12,7 @@ def success_response(data):
         "data": data
     }
     return jsonify(response), 200
+
 
 def error_response(message, status_code=400):
     response = {
