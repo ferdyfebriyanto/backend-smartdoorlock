@@ -1,25 +1,18 @@
 from datetime import datetime
 from app.database import db
-from bson import ObjectId
 
 class History(db.Document):
-    idUser = db.ObjectIdField(required=True, default=lambda: ObjectId())
-    name = db.StringField(required=True)
-    status = db.StringField(required=True)
-    date = db.StringField(required=True)
-    time = db.StringField(required=True)
-    image = db.StringField(required=True)
+    user = db.ObjectIdField(required=False, default=None)
+    status = db.BooleanField(required=True)
+    message = db.StringField(required=True)
     created_at = db.DateTimeField(default=datetime.now)
     
     def to_dict(self):
         return {
             'id': str(self.id),
-            'idUser': str(self.idUser),
-            'name': self.name,
+            'user': str(self.user),
             'status': self.status,
-            'date': self.date,
-            'time': self.time,
-            'image': self.image,
+            'message': self.message,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S')
         }
 
@@ -29,28 +22,23 @@ class History(db.Document):
         return [history.to_dict() for history in histories]
 
     @staticmethod
-    def create(idUser, name, status, date, time, image):
-        history = History(idUser=idUser, name=name, status=status, date=date, time=time, image=image)
+    def create(user, status, message):
+        history = History(user=user, status=status, message=message)
         history.save()
         return history.to_dict()
 
     @staticmethod
-    def update(history_id, idUser=None, name=None, status=None, date=None, time=None, image=None):
+    def update(history_id, user, status, message):
         history = History.objects(id=history_id).first()
         if not history:
             return None
-        if idUser:
-            history.idUser = idUser
-        if name:
-            history.name = name
+        if user:
+            history.user = user
         if status:
             history.status = status
-        if date:
-            history.date = date
-        if time:
-            history.time = time
-        if image:
-            history.image = image
+        if message:
+            history.message = message
+
         history.save()
         return history.to_dict()
 

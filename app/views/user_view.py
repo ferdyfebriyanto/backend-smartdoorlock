@@ -8,5 +8,3 @@ user_bp.route('', methods=['POST'])(create_user)
 user_bp.route('/<string:user_id>', methods=['GET'])(get_user)
 user_bp.route('/<string:user_id>', methods=['PUT'])(update_user)
 user_bp.route('/<string:user_id>', methods=['DELETE'])(delete_user)
-user_bp.route('/company/<string:company_id>', methods=['GET'])(get_user_by_id_company)
-

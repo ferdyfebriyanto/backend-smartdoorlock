@@ -1,4 +1,10 @@
 flask==2.2.2
+Werkzeug==2.2.2
+bson
+flask-mongoengine
+tensorflow==2.15.1
 requests
 deepface==0.0.78
 flask-cors==3.0.10
+websockets
+python-dotenv
