@@ -1,5 +1,6 @@
 import requests
-
+import json
+from config import Config 
 
 class HttpClient:
     def __init__(self, base_url, headers={}):
@@ -12,9 +13,18 @@ class HttpClient:
             url = self.base_url + endpoint
             print(f"url: {url}")
             response = self.request.post(url=url, files=files)
-            response.raise_for_status()
-            print(f"response: {response}")
-            return response
+            print(f"response raw: {response.content}")
+            print(type(response.content))
+
+            res = response.json()
+
+            print(f"response: {res}")
+            print(type(res))
+            
+            if (response.status_code == 200):
+                return res
+            
+            return None
         except requests.exceptions.RequestException as e:
             print(f"error on request: {e}")
             return None
@@ -27,3 +37,8 @@ class HttpClient:
         except requests.exceptions.RequestException as e:
             print(f"error on request: {e}")
             return None
+        
+http_client = HttpClient(
+    base_url=Config.FACE_RECOG_URL, 
+    headers={'e-face-api-key': Config.FACE_RECOG_API_KEY},
+    )
