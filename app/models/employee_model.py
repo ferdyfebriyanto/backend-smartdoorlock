@@ -2,11 +2,6 @@ from datetime import datetime
 from app.database import db
 from enum import Enum
 
-class Status(Enum):
-    REGISTERING = 'Registering'
-    FAILED = 'Failed'
-    REGISTERED = 'Registered'
-
 class Employee(db.Document):
     name = db.StringField(required=True)
     email = db.EmailField(required=True, unique=True)
@@ -14,8 +9,8 @@ class Employee(db.Document):
     job = db.StringField(required=True)
     salary = db.IntField(required=True)
     image = db.StringField(required=True)
-    face_status = db.EnumField(Status, default=Status.REGISTERING)
-    face_id = db.StringField()
+    face_status = db.StringField(required=False, default='Registering')
+    face_id = db.StringField(required=False, default=None)
     created_at = db.DateTimeField(default=datetime.now)
     
     def to_dict(self):
@@ -44,7 +39,7 @@ class Employee(db.Document):
         return employee.to_dict()
 
     @staticmethod
-    def update(user_id, name=None, email=None, phone=None, job=None, salary=None, image=None):
+    def update(user_id, name=None, email=None, phone=None, job=None, salary=None, image=None, face_status=None, face_id=None):
         employee = Employee.objects(id=user_id).first()
         if not employee:
             return None
@@ -58,6 +53,10 @@ class Employee(db.Document):
             employee.job = job
         if salary:
             employee.salary = salary
+        if face_status:
+            employee.face_status = face_status
+        if face_id:
+            employee.face_id = face_id
         if image:
             employee.image = image
 
@@ -89,3 +88,10 @@ class Employee(db.Document):
         except Employee.DoesNotExist:
             return None
     
+    @staticmethod
+    def get_by_face_id(face_id):
+        try:
+            employee = Employee.objects.get(face_id=face_id)
+            return employee.to_dict()
+        except Employee.DoesNotExist:
+            return None

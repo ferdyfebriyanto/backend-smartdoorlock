@@ -1,7 +1,6 @@
 import websockets
 import base64
 from io import BytesIO
-from app.helpers.http_client import http_client
 from config import Config
 import app.services.face_service as FaceService
 

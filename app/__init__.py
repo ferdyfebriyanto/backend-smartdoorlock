@@ -11,8 +11,6 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*"}})
     app.config.from_object(Config)
 
-    print(app.config)
-
     initialize_db(app)
 
     app.register_blueprint(user_bp)

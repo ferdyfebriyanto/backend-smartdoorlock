@@ -4,7 +4,7 @@ from app.utils import *
 from io import BytesIO
 import requests
 import asyncio
-from app.services.face_service import FaceService
+import app.services.face_service as FaceService
 
 def get_employees():
     employees = Employee.get_all()
@@ -38,8 +38,9 @@ def create_employee():
     }
 
     files = {'image': ('image.png', image, 'image/png')}
-
-    asyncio.run(FaceService.register_face(data, files))      
+    print('before run')
+    asyncio.run(FaceService.register_face(data, files))
+    print('after run')
     return success_response(employee)
 
 def get_employee(employee_id):

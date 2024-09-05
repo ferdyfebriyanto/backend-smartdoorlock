@@ -11,16 +11,9 @@ class HttpClient:
     def post(self, endpoint, data=None, files=None):
         try:
             url = self.base_url + endpoint
-            print(f"url: {url}")
-            response = self.request.post(url=url, files=files)
-            print(f"response raw: {response.content}")
-            print(type(response.content))
-
+            response = self.request.post(url=url, data=data, files=files)
             res = response.json()
 
-            print(f"response: {res}")
-            print(type(res))
-            
             if (response.status_code == 200):
                 return res
             

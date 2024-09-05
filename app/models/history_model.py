@@ -22,7 +22,7 @@ class History(db.Document):
         return [history.to_dict() for history in histories]
 
     @staticmethod
-    def create(user, status, message):
+    def create(user=None, status=None, message=None):
         history = History(user=user, status=status, message=message)
         history.save()
         return history.to_dict()
