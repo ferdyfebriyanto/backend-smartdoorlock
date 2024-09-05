@@ -25,8 +25,27 @@ class HttpClient:
     def get(self, endpoint):
         try:
             url = self.base_url + endpoint
-            self.request.request("GET", url)
-            return self.request.getresponse()
+            response = self.request.get(url)
+            res = response.json()
+
+            if (response.status_code == 200):
+                return res
+            
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"error on request: {e}")
+            return None
+        
+    def delete(self, endpoint):
+        try:
+            url = self.base_url + endpoint
+            response = self.request.delete(url)
+            res = response.json()
+
+            if (response.status_code == 200):
+                return res
+            
+            return None
         except requests.exceptions.RequestException as e:
             print(f"error on request: {e}")
             return None

@@ -67,6 +67,7 @@ def update_employee(employee_id):
 def delete_employee(employee_id):
     employee = Employee.delete_by_id(employee_id)
     if employee:
+        asyncio.run(FaceService.delete_face(employee['face_id']))
         return success_response(employee)
     else:
         return error_response("Data karyawan tidak ada")

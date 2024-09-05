@@ -12,8 +12,18 @@ async def register_face(data, files):
     else:
       Employee.update(data['identifier'], face_id=None, face_status='Failed')
 
+async def delete_face(face_id):
+  res = http_client.delete(f'/delete_face/{face_id}')
+  if res is None:
+      return None
+  if res['status_code'] == 200:
+    return True
+  else:
+    return False
+
 def recognize_face(files):
   res = http_client.post('/face_recognition', files=files)
+  print(f'Response: {res}')
   if res is None:
       return None
   
@@ -31,22 +41,22 @@ def recognize_face(files):
   else:
     return None
 
-def process_image(websocket, files):
+async def process_image(websocket, files):
   res = recognize_face(files)
   
   if res is None:
       History.create(status=False, message='Unknown user tried to access the system')
-      websocket.send("false")
+      await websocket.send("false")
       return
   
   if res['verified']:
     employee = Employee.get_by_face_id(res['employee_id'])
     if employee is not None:
       History.create(status=True, message='successfully accessed the system', user=employee['id'])
-      websocket.send("true")
+      await websocket.send("true")
     else:
       History.create(status=False, message='Unknown user tried to access the system')
-      websocket.send("false")
+      await websocket.send("false")
   else:
     History.create(status=False, message='Unknown user tried to access the system')
-    websocket.send("false")
+    await websocket.send("false")

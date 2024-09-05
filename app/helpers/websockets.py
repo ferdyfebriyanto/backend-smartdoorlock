@@ -31,7 +31,7 @@ class WebSocketClient:
         while self.running:
             try:
                 message = await self.websocket.recv()
-                self.process_message(message)
+                await self.process_message(message)
             except websockets.ConnectionClosed as e:
                 print(f"Connection closed with error: {e}")
                 self.running = False
@@ -39,12 +39,12 @@ class WebSocketClient:
     async def on_close(self):
         print("Disconnected from the WebSocket server.")
 
-    def process_message(self, message):
+    async def process_message(self, message):
         image = base64.b64decode(message)
         image_obj = BytesIO(image)
         files = {'image': ('image.png', image_obj, 'image/png')}
         
-        FaceService.process_image(self.websocket, files)
+        await FaceService.process_image(self.websocket, files)
 
     def stop(self):
         self.running = False

@@ -2,7 +2,7 @@ from datetime import datetime
 from app.database import db
 
 class History(db.Document):
-    user = db.ObjectIdField(required=False, default=None)
+    user = db.StringField(required=False, default='')
     status = db.BooleanField(required=True)
     message = db.StringField(required=True)
     created_at = db.DateTimeField(default=datetime.now)
@@ -22,7 +22,7 @@ class History(db.Document):
         return [history.to_dict() for history in histories]
 
     @staticmethod
-    def create(user=None, status=None, message=None):
+    def create(user='', status=None, message=None):
         history = History(user=user, status=status, message=message)
         history.save()
         return history.to_dict()
