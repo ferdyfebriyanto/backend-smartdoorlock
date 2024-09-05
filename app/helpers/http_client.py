@@ -1,5 +1,6 @@
 import requests
-
+import json
+from config import Config 
 
 class HttpClient:
     def __init__(self, base_url, headers={}):
@@ -10,11 +11,13 @@ class HttpClient:
     def post(self, endpoint, data=None, files=None):
         try:
             url = self.base_url + endpoint
-            print(f"url: {url}")
-            response = self.request.post(url=url, files=files)
-            response.raise_for_status()
-            print(f"response: {response}")
-            return response
+            response = self.request.post(url=url, data=data, files=files)
+            res = response.json()
+
+            if (response.status_code == 200):
+                return res
+            
+            return None
         except requests.exceptions.RequestException as e:
             print(f"error on request: {e}")
             return None
@@ -22,8 +25,32 @@ class HttpClient:
     def get(self, endpoint):
         try:
             url = self.base_url + endpoint
-            self.request.request("GET", url)
-            return self.request.getresponse()
+            response = self.request.get(url)
+            res = response.json()
+
+            if (response.status_code == 200):
+                return res
+            
+            return None
         except requests.exceptions.RequestException as e:
             print(f"error on request: {e}")
             return None
+        
+    def delete(self, endpoint):
+        try:
+            url = self.base_url + endpoint
+            response = self.request.delete(url)
+            res = response.json()
+
+            if (response.status_code == 200):
+                return res
+            
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"error on request: {e}")
+            return None
+        
+http_client = HttpClient(
+    base_url=Config.FACE_RECOG_URL, 
+    headers={'e-face-api-key': Config.FACE_RECOG_API_KEY},
+    )
