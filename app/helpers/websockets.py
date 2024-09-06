@@ -25,7 +25,6 @@ class WebSocketClient:
 
     async def on_connect(self):
         print("Connected to the WebSocket server.")
-        await self.websocket.send("Hello, WebSocket server!")
 
     async def listen(self):
         while self.running:

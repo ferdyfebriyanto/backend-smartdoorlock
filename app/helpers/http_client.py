@@ -36,6 +36,20 @@ class HttpClient:
             print(f"error on request: {e}")
             return None
         
+    def put(self, endpoint, data=None, files=None):
+        try:
+            url = self.base_url + endpoint
+            response = self.request.put(url=url, data=data, files=files)
+            res = response.json()
+
+            if (response.status_code == 200):
+                return res
+            
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"error on request: {e}")
+            return None
+        
     def delete(self, endpoint):
         try:
             url = self.base_url + endpoint

@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from app.views.user_view import user_bp
 from app.views.history_view import history_bp
 from app.views.employee_view import employee_bp
+from app.views.auth_view import auth_bp
 from config import Config
 from app.database import initialize_db
 from flask_cors import CORS
@@ -16,6 +17,7 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(history_bp)
     app.register_blueprint(employee_bp)
+    app.register_blueprint(auth_bp)
     
     @app.errorhandler(Exception)
     def handle_error(e):

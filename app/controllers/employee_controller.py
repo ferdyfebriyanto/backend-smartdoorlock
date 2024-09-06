@@ -38,9 +38,8 @@ def create_employee():
     }
 
     files = {'image': ('image.png', image, 'image/png')}
-    print('before run')
     asyncio.run(FaceService.register_face(data, files))
-    print('after run')
+
     return success_response(employee)
 
 def get_employee(employee_id):
@@ -60,6 +59,17 @@ def update_employee(employee_id):
 
     employee = Employee.update(employee_id, name=name, email=email, phone=phone, job=job, salary=salary, image=image)
     if employee:
+        if image is not None:
+            img = requests.get(employee['image']).content
+            image = BytesIO(img)
+
+            data = {
+                'real_name': employee['name'],
+            }
+
+            files = {'image': ('image.png', image, 'image/png')}
+            asyncio.run(FaceService.update_face(employee['face_id'], data, files))
+
         return success_response(employee)
     else:
         return error_response("Data karyawan tidak ada")

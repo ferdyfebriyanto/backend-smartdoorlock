@@ -1,6 +1,7 @@
 from flask import request
 from app.models.user_model import User
 from app.utils import *
+import app.helpers.encryptor as Encryptor
 
 def get_users():
     users = User.get_all()
@@ -15,6 +16,9 @@ def create_user():
     email = request.json.get('email', None)
     password = request.json.get('password', None)
     phone = request.json.get('phone', None)
+
+    if password:
+        password = Encryptor.hash_password(password)
 
     emailCek = User.get_by_email(email)
     if emailCek:

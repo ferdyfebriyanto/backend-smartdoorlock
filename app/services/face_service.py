@@ -12,6 +12,15 @@ async def register_face(data, files):
     else:
       Employee.update(data['identifier'], face_id=None, face_status='Failed')
 
+async def update_face(face_id, data, files):
+  res = http_client.put(f'/face_registration/{face_id}', data, files)
+  if res is None:
+      return None
+  if res['status_code'] == 200:
+    return True
+  else:
+    return False
+
 async def delete_face(face_id):
   res = http_client.delete(f'/delete_face/{face_id}')
   if res is None:
